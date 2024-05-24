@@ -118,16 +118,15 @@ class SampleServiceProvider extends ServiceProvider
             $sourcePath => $viewPath,
         ], 'views');
 
-        $paths = array_map(
-            function ($path) use ($sourcePath) {
-                if ($path === resource_path('views')) {
-                    return $sourcePath;
-                }
+        $paths = array_merge(array_filter(array_map(function ($path) {
+            $path = str_replace('default', setting('general.theme'), $path); 
+            // Check if the directory exists before adding it
+            if (file_exists($path.'/modules/sample') && is_dir($path.'/modules/sample'))
                 return $path.'/modules/sample';
-            },
-            \Config::get('view.paths')
-        );
-        
+
+            return null;
+        }, \Config::get('view.paths'))), [$sourcePath]);
+
         $this->loadViewsFrom($paths, 'sample');
     }
 
